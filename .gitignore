@@ -1,0 +1,10 @@
+hf_home/
+data/
+artifacts/
+runs/
+checkpoints/
+__pycache__/
+*.pyc
+logs/
+.env
+wandb/

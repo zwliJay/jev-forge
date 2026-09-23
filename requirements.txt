@@ -1,0 +1,9 @@
+torch==2.14.0
+transformers==5.17.0
+safetensors>=0.5
+numpy
+pyarrow
+pandas
+fastapi
+uvicorn
+huggingface_hub[cli]
