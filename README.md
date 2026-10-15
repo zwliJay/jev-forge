@@ -30,7 +30,18 @@ escalation from the elements currently available on a page.
   </a>
 </p>
 
-## Results
+## Current mixed-data checkpoint
+
+The 2026-10-16 update keeps the JevForge architecture and trains one epoch on
+8,000 decisions: 60% Open-Jev, 25% Mind2Web and 15% general decision data.
+The configured context limit is 8,192 tokens; actual retained training paths
+reach 1,623 tokens. Dev CE is 0.7649 on 300 independent decisions, with
+150 separate calibration decisions. This is a training diagnostic.
+See [the mixed training recipe](docs/MIXED_TRAINING.md) for pinned sources,
+CUDA bindings, audits and offline W&B records. Full S1MB evaluation is pending;
+the historical results below describe the earlier checkpoint only.
+
+## Historical Mind2Web results
 
 Results use fixed, website-disjoint test and OOD splits. The 0.8B and 0.6B
 models share the same data and evaluation protocol; Jev-1.13 is shown as a
@@ -98,7 +109,7 @@ curl localhost:8123/v1/systemone \
   }'
 ```
 
-## Reproduce the 0.8B run
+## Reproduce the historical Mind2Web run
 
 The recipe builds website-disjoint records from Mind2Web annotations, adds
 label distributions for missing decision fields, fine-tunes the pretrained

@@ -1,8 +1,7 @@
 ---
 license: apache-2.0
 base_model: Qwen/Qwen3.5-0.8B
-library_name: transformers
-pipeline_tag: text-classification
+library_name: pytorch
 tags:
   - decision-model
   - candidate-ranking
@@ -23,7 +22,19 @@ The checkpoint supports the Jev-style `choice`, binary `noul`, and ordered
 JevForge is a personal, independent research project exploring open
 structured-decision models and Jev-style interfaces.
 
-## Evaluation
+## Current mixed-data release (2026-10-16)
+
+The existing Hugging Face repository receives new weights with unchanged
+architecture: 8,000 decisions (4,800 Open-Jev / 2,000 Mind2Web / 1,200 general),
+one epoch, configured candidate-path limit 8,192, 300 dev and 150 calibration
+decisions. Actual training paths reach 1,623 tokens. Selected step 870 has dev
+CE 0.7649007; calibrated temperatures are choice 1.323, noul 1.1755, score 0.9275.
+S1MB evaluation is pending. See [the recorded recipe](docs/MIXED_TRAINING.md)
+and the HF training manifests for provenance and same-source-family exposure.
+Earlier weights remain at HF revision `a7e0e71a8265ed8c4e492e4574b51afa85a85f6a`.
+The tables and data recipe below concern that historical Mind2Web checkpoint.
+
+## Historical Mind2Web evaluation
 
 The recorded evaluation uses fixed website-disjoint splits built from the same
 data recipe used for the 0.6B run.
@@ -55,7 +66,7 @@ The command downloads this checkpoint, selects Apple MPS automatically, starts
 the Jev-compatible local endpoint, and opens an interactive page that displays
 the measured inference latency, candidate probabilities, and resulting click.
 
-## Training data
+## Historical Mind2Web training data
 
 The run uses transformed records derived from
 [Mind2Web](https://github.com/OSU-NLP-Group/Mind2Web) annotations sourced
@@ -66,7 +77,7 @@ Mind2Web is distributed under
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The checkpoint does
 not bundle raw or unzipped official Mind2Web test files.
 
-## Data lineage
+## Historical Mind2Web data lineage
 
 - Backbone: pretrained `Qwen/Qwen3.5-0.8B` weights.
 - Upstream dataset: `OSU-NLP-Group/Mind2Web`.

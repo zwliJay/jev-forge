@@ -21,7 +21,16 @@ JevForge 把结构化决策变成一条可复现的完整流水线。输入状�
 
 [![JevForge 网页交互决策演示](docs/assets/jevforge-demo.gif)](https://jev-forge.vercel.app)
 
-## 结果
+## 当前混合数据模型
+
+2026-10-16 更新保留 JevForge 原架构，使用 8,000 条决策训练 1 个 epoch：
+60% Open-Jev、25% Mind2Web、15% 通用决策数据。上下文上限为 8,192 token，
+本轮实际保留的训练路径最长为 1,623 token；这不代表已经验证了 8K 长输入能力。
+独立验证集 300 条，交叉熵 0.7649；另有 150 条独立校准数据。
+完整 S1MB 评测尚未完成。固定版本、加速配置、数据审计和离线 W&B 记录见
+[混合训练说明](docs/MIXED_TRAINING.md)。下方指标属于历史模型。
+
+## 历史 Mind2Web 结果
 
 仓库中的评测使用固定、按网站隔离的 test/OOD 划分。0.8B 版本使用
 Qwen3.5 预训练 backbone，与 0.6B 运行使用相同数据与评测协议；Jev-1.13 作为
@@ -69,7 +78,7 @@ pip install -r requirements.txt
 python -m jevforge.serve --checkpoint-dir checkpoints/JevForge-0.8B --port 8123
 ```
 
-## 复现实验
+## 复现历史 Mind2Web 实验
 
 流程从 Mind2Web 标注构建网站隔离的数据划分，补齐缺失的决策标签分布，
 用交叉熵和 Brier 目标微调预训练 0.8B backbone，完成温度校准后在冻结的
