@@ -69,23 +69,24 @@ def build_examples(records, tokenizer, max_length, label_smoothing=0.0):
 
 
 def batches_by_tokens(examples, questions_per_batch, max_tokens):
-    """Group complete questions into microbatches, length-bucketed to cut padding."""
-    order = sorted(range(len(examples)),
-                   key=lambda i: max(len(leaf) for leaf in examples[i]["leaves"]))
+    """Pack whole questions using their actual shared padded batch cost."""
+    width_of = lambda e: (max(len(leaf) for leaf in e["leaves"]) + 63) // 64 * 64
+    order = sorted(range(len(examples)), key=lambda i: width_of(examples[i]))
     out = []
     for start in range(0, len(order), questions_per_batch):
         chunk = [examples[i] for i in order[start:start + questions_per_batch]]
-        micro, used, questions = [], 0, []
+        micro, width, leaves = [], 0, 0
         for example in chunk:
-            cost = max(len(leaf) for leaf in example["leaves"]) * len(example["leaves"])
-            if micro and used + cost > max_tokens:
-                out.append((questions, micro))
-                micro, used, questions = [], 0, []
+            next_width = max(width, width_of(example))
+            next_leaves = leaves + len(example["leaves"])
+            if micro and next_width * next_leaves > max_tokens:
+                out.append((micro, micro))
+                micro, width, leaves = [], 0, 0
+                next_width, next_leaves = width_of(example), len(example["leaves"])
             micro.append(example)
-            used += cost
-            questions.append(example)
+            width, leaves = next_width, next_leaves
         if micro:
-            out.append((questions, micro))
+            out.append((micro, micro))
     return out
 
 
@@ -287,6 +288,10 @@ def main():
         "parameters": sum(parameter.numel() for parameter in backbone.parameters()),
         "dtype": str(next(backbone.parameters()).dtype),
     }), flush=True)
+    # Training and validation score complete paths; no generation cache is needed.
+    backbone.config.use_cache = False
+    if hasattr(backbone.config, "text_config"):
+        backbone.config.text_config.use_cache = False
     hidden_size = backbone_hidden_size(backbone_config)
     model = JevForgeModel(backbone, hidden_size).to(device)
     if not args.no_grad_ckpt:
