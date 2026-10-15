@@ -29,7 +29,9 @@ architecture: 8,000 decisions (4,800 Open-Jev / 2,000 Mind2Web / 1,200 general),
 one epoch, configured candidate-path limit 8,192, 300 dev and 150 calibration
 decisions. Actual training paths reach 1,623 tokens. Selected step 870 has dev
 CE 0.7649007; calibrated temperatures are choice 1.323, noul 1.1755, score 0.9275.
-S1MB evaluation is pending. See [the recorded recipe](docs/MIXED_TRAINING.md)
+Full English S1MB evaluation completed: 137/137 benchmarks, zero failures.
+Baseline-adjusted scores are Noul 16.46 / Choice 20.74 / Score 8.26; task
+average 15.16. See the [complete report](docs/S1MB_MIXED_20261016.md). See [the recorded recipe](docs/MIXED_TRAINING.md)
 and the HF training manifests for provenance and same-source-family exposure.
 Earlier weights remain at HF revision `a7e0e71a8265ed8c4e492e4574b51afa85a85f6a`.
 The tables and data recipe below concern that historical Mind2Web checkpoint.

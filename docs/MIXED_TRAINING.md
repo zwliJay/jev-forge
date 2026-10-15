@@ -142,3 +142,10 @@ The released manifest, actual assembly scripts, launcher, independent source
 audit and metrics are the run evidence. Benchmark evaluation uses the same
 CUDA bindings with the official S1MB JevForge adapter; this override and
 context settings must accompany submissions. The user submits the PR.
+
+## Completed evaluation
+
+The full 137-benchmark English evaluation is complete with zero failures and
+zero abstentions. See [the fixed-configuration report](S1MB_MIXED_20261016.md).
+The user receives validated files and the PR body; no leaderboard PR has been
+submitted by this workflow.

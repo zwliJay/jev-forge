@@ -1,0 +1,60 @@
+{
+  "benchmarks": 137,
+  "complete": 137,
+  "failed": 0,
+  "abstained": 0,
+  "decisions": 26269,
+  "task_scores": {
+    "noul": 16.46440880908509,
+    "choice": 20.742038847940602,
+    "score": 8.261405188357491
+  },
+  "task_average": 15.155950948461062,
+  "generalization_task_scores": {
+    "noul": 7.000000000000006,
+    "choice": 51.492692518575936,
+    "score": 5.403887338468616
+  },
+  "benchmark_elapsed_seconds_sum": 1321.2830713819712,
+  "model_revision": "f67a3bf2ae4acbd0bf1df6703aa62b91339912b8",
+  "dataset_revision": "6aa5f39753f98eef604a2af6a61f41670c030f28",
+  "runtime_settings": {
+    "device": "cuda:0",
+    "cuda_visible_devices": null,
+    "source_python_sha256": "d08dbcf6eddc59e62c572a8499e2a3a4f0750a45477a2cef7eacb798fc9b4350",
+    "renderer": "native-anonymous-choice-batched-v2",
+    "questions_per_call": 1,
+    "versions": {
+      "torch": "2.8.0+cu128",
+      "transformers": "5.19.0"
+    },
+    "dtype": "bfloat16",
+    "candidate_batch_size": 32,
+    "candidate_batch_token_budget": 8192,
+    "case_batch_size": 16,
+    "checkpoint_max_length": 8192,
+    "temperature": {
+      "choice": 1.323,
+      "noul": 1.1755,
+      "score": 0.9275
+    },
+    "max_length": 32768,
+    "input_policy": "native strict encoder; over-limit input fails",
+    "convolution_backend": "causal-conv1d-cuda",
+    "delta_rule_backend": "fla.ops.gated_delta_rule.chunk",
+    "hub_kernels": false,
+    "runtime_policy": "native-causal-conv1d-fla-explicit-bindings-v2",
+    "evaluation_wrapper_sha256": "7512b82c19c02837d982485a22a54143ee08af89054ec05b31e2b30354001880",
+    "kernel_helper_sha256": "14d61db6a362d680e99cf06470a2fca73fc69c12c407a17b31382d7c8c60d2e4",
+    "flash-linear-attention_version": "0.5.2",
+    "fla-core_version": "0.5.2",
+    "torch_version": "2.8.0+cu128",
+    "transformers_version": "5.19.0",
+    "kernels_version": "0.17.2",
+    "causal-conv1d_version": "1.7.0"
+  },
+  "total_params": 854036545,
+  "active_params": 597987393,
+  "parameter_count_method": "embedding_excluded_parameters_v1",
+  "score_definition": "Official S1MB task_score: per-benchmark clipped baseline-adjusted skill, excluding target-degenerate benchmarks; 0-100 scale, not raw accuracy. Task average is equal mean of the three task scores. No leaderboard rank/Borda claim without a full reference comparison."
+}

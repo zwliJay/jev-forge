@@ -38,8 +38,11 @@ The configured context limit is 8,192 tokens; actual retained training paths
 reach 1,623 tokens. Dev CE is 0.7649 on 300 independent decisions, with
 150 separate calibration decisions. This is a training diagnostic.
 See [the mixed training recipe](docs/MIXED_TRAINING.md) for pinned sources,
-CUDA bindings, audits and offline W&B records. Full S1MB evaluation is pending;
-the historical results below describe the earlier checkpoint only.
+CUDA bindings, audits and offline W&B records. Full English S1MB evaluation completed: **137/137 benchmarks, zero failed
+decisions**, with task scores Noul 16.46 / Choice 20.74 / Score 8.26 and task
+average 15.16 (baseline-adjusted scores, not accuracy). See the
+[complete report](docs/S1MB_MIXED_20261016.md) for source exposure and fixed
+settings. The historical results below describe the earlier checkpoint only.
 
 ## Historical Mind2Web results
 
