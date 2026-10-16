@@ -1,0 +1,124 @@
+From a0fb170cf97baed34a9381a244cb616133e0a478 Mon Sep 17 00:00:00 2001
+From: jayforgex <15557956+jayforgex@users.noreply.github.com>
+Date: Fri, 16 Oct 2026 09:41:16 +0800
+Subject: [PATCH] Match JevForge structured JSON rendering to native training
+ inputs
+
+---
+ evaluator/src/s1mb/adapters/jevforge.py       | 36 +++++++++++++++++--
+ .../tests/test_jevforge_native_renderer.py    | 36 +++++++++++++++++++
+ 2 files changed, 69 insertions(+), 3 deletions(-)
+ create mode 100644 evaluator/tests/test_jevforge_native_renderer.py
+
+diff --git a/evaluator/src/s1mb/adapters/jevforge.py b/evaluator/src/s1mb/adapters/jevforge.py
+index 8a9c37d..b599d55 100644
+--- a/evaluator/src/s1mb/adapters/jevforge.py
++++ b/evaluator/src/s1mb/adapters/jevforge.py
+@@ -1,13 +1,42 @@
+ """Bridge to JevForge's native predictor and checkpoint calibration."""
+ 
+ import importlib
++import json
+ 
+ from s1mb.data import Prediction
+ 
+-from .base import questions_for_api
+ from .upstream import UpstreamAdapter, candidate_batches, state_text
+ 
+ 
++def native_questions(questions):
++    """Match JevForge training serialization, retaining raw JSON key order.
++
++    hf_data's generic display text uses compact sorted JSON. JevForge's
++    training converter uses json.dumps(..., ensure_ascii=False), so recover
++    the original structured values before rendering the native prompt.
++    Plain source strings stay verbatim; candidate order/IDs remain unchanged.
++    """
++    def text(rendered, raw):
++        if raw is None:
++            return rendered
++        value = json.loads(raw)
++        return value if isinstance(value, str) else json.dumps(value, ensure_ascii=False)
++
++    result = {}
++    for q in questions:
++        instructions = text(q.instructions, q.instructions_json)
++        instructions = "\n\n".join(s for s in (q.system_prompt, instructions) if s)
++        descriptions = [text(o.description, o.description_json) for o in q.options]
++        if q.task == "choice":
++            criteria = {f"option_{i}": description for i, description in enumerate(descriptions)}
++        elif q.task == "score":
++            criteria = descriptions
++        else:
++            criteria = {o.id: description for o, description in zip(q.options, descriptions, strict=True)}
++        result[q.id] = {"type": q.task, "instructions": instructions, "criteria": criteria}
++    return result
++
++
+ class JevForgeAdapter(UpstreamAdapter):
+     case_batch_size = 16
+ 
+@@ -40,7 +69,8 @@ class JevForgeAdapter(UpstreamAdapter):
+             "candidate_batch_size": 32,
+             "candidate_batch_token_budget": 8192,
+             "case_batch_size": self.case_batch_size,
+-            "renderer": "native-anonymous-choice-batched-v2",
++            "renderer": "native-training-json-anonymous-choice-v3",
++            "structured_json_policy": "source key order and default separators; strings verbatim",
+             "checkpoint_max_length": checkpoint_limit,
+             "temperature": self.engine.temperature,
+             "max_length": self.engine.max_length,
+@@ -60,7 +90,7 @@ class JevForgeAdapter(UpstreamAdapter):
+                 encode(
+                     {
+                         "state": state_text(case.state),
+-                        "questions": questions_for_api(case.questions, anonymous_choice=True),
++                        "questions": native_questions(case.questions),
+                     },
+                     self.engine.tokenizer,
+                     self.engine.max_length,
+diff --git a/evaluator/tests/test_jevforge_native_renderer.py b/evaluator/tests/test_jevforge_native_renderer.py
+new file mode 100644
+index 0000000..0cdbb46
+--- /dev/null
++++ b/evaluator/tests/test_jevforge_native_renderer.py
+@@ -0,0 +1,36 @@
++import json
++import unittest
++from s1mb.adapters.base import questions_for_api
++from s1mb.adapters.jevforge import native_questions
++from s1mb.data import Question,Option
++
++class NativeRendererTest(unittest.TestCase):
++    def question(self, **overrides):
++        args=dict(id='q',task='choice',instructions='pick',options=[Option(id='node9',description='first'),Option(id='node2',description='second')]);args.update(overrides);return Question(**args)
++
++    def test_plain_text_matches_existing_adapter(self):
++        q=self.question(system_prompt='system')
++        self.assertEqual(native_questions([q]),questions_for_api([q],anonymous_choice=True))
++
++    def test_structured_instruction_restores_training_order_and_spacing(self):
++        q=self.question(instructions='{"a":[1,"x"],"z":2}',instructions_json='{"z": 2, "a": [1, "x"]}',system_prompt='policy')
++        actual=native_questions([q])['q']['instructions']
++        self.assertEqual(actual,'policy\n\n{"z": 2, "a": [1, "x"]}')
++        self.assertNotEqual(actual,questions_for_api([q],anonymous_choice=True)['q']['instructions'])
++
++    def test_plain_json_string_stays_verbatim(self):
++        text='Find the "quoted" value.\n中文'
++        q=self.question(instructions=text,instructions_json=json.dumps(text))
++        self.assertEqual(native_questions([q])['q']['instructions'],text)
++
++    def test_structured_criteria_keep_source_order(self):
++        q=self.question(options=[Option(id='x',description='{"a":1,"z":2}',description_json='{"z":2,"a":1}'),Option(id='y',description='plain',description_json='"plain"')])
++        self.assertEqual(native_questions([q])['q']['criteria'],{'option_0':'{"z": 2, "a": 1}','option_1':'plain'})
++
++    def test_noul_order_and_score_levels_are_not_remapped(self):
++        n=self.question(task='noul',options=[Option(id='true',description='yes'),Option(id='false',description='no')])
++        s=self.question(task='score',options=[Option(id='low',description='low',value=0),Option(id='high',description='high',value=.5)])
++        self.assertEqual(native_questions([n])['q']['criteria'],{'true':'yes','false':'no'})
++        self.assertEqual(native_questions([s])['q']['criteria'],['low','high'])
++
++if __name__=='__main__':unittest.main()
+-- 
+2.34.1
+
